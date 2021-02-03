@@ -41,8 +41,8 @@ export default class ProxyListFilter extends React.Component<ProxyListFilterProp
     handleProps(props: ProxyListFilterProps) {
         const parsed = queryString.parse(props.location.search);
 
-        const https = parsed['https'] == 'true' ? true : null;
-        const anonymous = parsed['anonymous'] == 'true' ? true : null;
+        const https = parsed['https'] == 'true' ? true : (parsed['https'] == 'false' ? false : null);
+        const anonymous = parsed['anonymous'] == 'true' ? true : (parsed['anonymous'] == 'false' ? false : null );
 
         this.setState({https: https, anonymous: anonymous})
     }
@@ -56,12 +56,10 @@ export default class ProxyListFilter extends React.Component<ProxyListFilterProp
         };
 
         if (key === 'HTTPS') {
-            params['https'] = https == true ? null : true;
+            params['https'] = https == true ? false : (https == false ? null : true);
         } else if (key === 'ANONYMOUS') {
-            params['anonymous'] = anonymous == true ? null : true;
-        }
-
-
+            params['anonymous'] = anonymous == true ? false : (anonymous == false ? null : true);
+        } 
         return `/?${queryString.stringify(params)}`;
     }
 

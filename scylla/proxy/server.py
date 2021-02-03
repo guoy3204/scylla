@@ -46,11 +46,14 @@ class ForwardingRequestHandler(web.RequestHandler):
 
         disable_forward_proxy = get_config('disable_forward_proxy', default=False)
 
+
         if disable_forward_proxy:
             self.forward()
+            logger.debug('proxy get_proxy_and_forward option %s', disable_forward_proxy )
         else:
             proxy = get_proxy(https=https)
             self.forward(host=proxy.ip, port=proxy.port)
+            logger.debug('proxy get_proxy_and_forward option %s %s %s', disable_forward_proxy, proxy.ip, proxy.port )
 
     @web.asynchronous
     def get(self, *args, **kwargs):
@@ -115,14 +118,19 @@ class ForwardingRequestHandler(web.RequestHandler):
             self.finish()
 
     def handle_response(self, response: HTTPResponse):
-
         if response.body:
+            logger.debug('The forward proxy has body')
             self.write(response.body)
+            self.set_status(200)
             self.finish()
         elif response.error:
             logger.debug('The forward proxy has an error: {}'.format(response.error))
+
+            self.write('The forward proxy has an error: {}'.format(response.error))
+            self.set_status(500)
             self.finish()
         else:
+            logger.debug('The forward proxy empty body finish')
             self.finish()
 
     def forward(self, host=None, port=None):

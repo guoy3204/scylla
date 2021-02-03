@@ -78,9 +78,10 @@ class Validator(object):
                 self._meta = meta
 
         except requests.Timeout:
-            logger.debug('Catch requests.Timeout for proxy ip: {}'.format(self._host))
+            logger.debug('Catch requests.Timeout for ip: {}'.format(self._host))
+
         except requests.RequestException as e:
-            logger.debug('Catch requests.RequestException for proxy ip: {}'.format(self._host))
+            logger.debug('Catch requests.RequestException for ip: {}'.format(self._host))
             logger.debug(e.__str__())
 
     def validate(self):
