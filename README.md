@@ -285,3 +285,14 @@ Apache License 2.0. For more details, please read the
 
   [Scrapy]: https://scrapy.org
   [requests]: http://docs.python-requests.org/
+
+
+
+pip uninstall pycurl
+export PYCURL_SSL_LIBRARY=nss
+pip install --compile --install-option="--with-nss" --no-cache-dir pycurl
+
+
+export SANIC_NO_UVLOOP=true
+export SANIC_NO_UJSON=true
+pip3 install sanic
