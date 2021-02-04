@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy.http import HtmlResponse
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
@@ -10,14 +11,18 @@ from sinanewsSpider.items import SinaNewsItem
 
 class SinanewsSpider(scrapy.Spider):
     name = 'sinanewsSpider'
-    with open(os.path.join(Path(__file__).parent, 'urls.txt'), 'r') as f:
-        start_urls = f.readlines()
+    
     custom_settings = {
         'LOG_LEVEL': 'ERROR'
     }
+    
+    # start_urls = ['http://auto.sina.com.cn/car/2011-03-28/0905743201.shtml']
+    # def parse(self, response):
+    #     return scrapy.Request("http://auto.sina.com.cn/car/2011-03-28/0905743201.shtml", callback=self.parse_details)
 
+    with open(os.path.join(Path(__file__).parent, 'urls.txt'), 'r') as f:
+        start_urls = f.readlines()
     def parse(self, response):
-        response.body.encoding('utf-8')
         soup = BeautifulSoup(response.body, 'html.parser')
         tags = soup.find_all('a', href=re.compile('(?=^http.*sina.*\d{4}-\d{2}-\d{2}.*html$)'   # doc pattern
                                                   '(?=^((?!video).)*$)'                         # ignore video
@@ -29,9 +34,26 @@ class SinanewsSpider(scrapy.Spider):
             url = tag.get('href')
             yield scrapy.Request(url, callback=self.parse_details_and_continue_crawling)
 
-    def parse_details_and_continue_crawling(self, response):
+    def parse_details_and_continue_crawling(self, response): 
         # 1. Parse Details
+        items = self.parse_details(response)
+        for i in items:
+            yield i
+        # 2. Continue crawling
         soup = BeautifulSoup(response.body, 'html.parser')
+        tags = soup.find_all('a', href=re.compile('(?=^http.*sina.*\d{4}-\d{2}-\d{2}.*html$)'   # doc pattern
+                                                  '(?=^((?!video).)*$)'                         # ignore video
+                                                  '(?=^((?!photo).)*$)'                         # ignore photo
+                                                  '(?=^((?!slide).)*$)'                         # ignore photo
+                                                  '(?=^((?!csj\/author).)*$)'                   # ignore csj/s=author
+                                                  ))
+        for tag in tags:
+            url = tag.get('href')
+            yield scrapy.Request(url, callback=self.parse_details_and_continue_crawling)
+
+    def parse_details(self, response): 
+        print('response.encoding: ' + response.encoding)
+        soup = BeautifulSoup(response.body.decode(response.encoding,"ignore"), 'html.parser')
         try:
             # ==> Extract Title
             title = self.extract_title(soup)
@@ -62,17 +84,6 @@ class SinanewsSpider(scrapy.Spider):
         except Exception as e:
             self.logger.error(str(e))
             # self.logger.error(traceback.format_exc())
-
-        # 2. Continue crawling
-        tags = soup.find_all('a', href=re.compile('(?=^http.*sina.*\d{4}-\d{2}-\d{2}.*html$)'   # doc pattern
-                                                  '(?=^((?!video).)*$)'                         # ignore video
-                                                  '(?=^((?!photo).)*$)'                         # ignore photo
-                                                  '(?=^((?!slide).)*$)'                         # ignore photo
-                                                  '(?=^((?!csj\/author).)*$)'                   # ignore csj/s=author
-                                                  ))
-        for tag in tags:
-            url = tag.get('href')
-            yield scrapy.Request(url, callback=self.parse_details_and_continue_crawling)
 
     @staticmethod
     def extract_title(soup):

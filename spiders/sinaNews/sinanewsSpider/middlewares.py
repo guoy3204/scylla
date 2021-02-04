@@ -4,6 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.http import HtmlResponse
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -20,6 +21,10 @@ class SinanewsspiderSpiderMiddleware:
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
+
+    # def process_response(self, request, response, spider):
+    #     response = HtmlResponse(url=response.url, body=response.body, encoding="utf-8")  
+    #     return response
 
     def process_spider_input(self, response, spider):
         # Called for each response that goes through the spider
