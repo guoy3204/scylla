@@ -54,7 +54,7 @@ class SinanewsSpider(scrapy.Spider):
                 # Keyword is not mandatory
                 self.logger.warning('Can not find keywords for ' + response.url)
                 keywords = ''
-            print(title)
+            print(title + " " + response.url)
             item = SinaNewsItem(_id=response.url, title=title, content=content,
                             pub_date=pub_date, source=source, keywords=keywords)
             yield item
