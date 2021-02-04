@@ -40,7 +40,7 @@ class SinanewsSpider(scrapy.Spider):
         for i in items:
             yield i
         # 2. Continue crawling
-        soup = BeautifulSoup(response.body, 'html.parser')
+        soup = BeautifulSoup(response.body.decode(response.encoding,"ignore"), 'html.parser')
         tags = soup.find_all('a', href=re.compile('(?=^http.*sina.*\d{4}-\d{2}-\d{2}.*html$)'   # doc pattern
                                                   '(?=^((?!video).)*$)'                         # ignore video
                                                   '(?=^((?!photo).)*$)'                         # ignore photo
