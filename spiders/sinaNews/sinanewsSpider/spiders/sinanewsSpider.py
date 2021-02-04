@@ -17,6 +17,7 @@ class SinanewsSpider(scrapy.Spider):
     }
 
     def parse(self, response):
+        response.body.encoding('utf-8')
         soup = BeautifulSoup(response.body, 'html.parser')
         tags = soup.find_all('a', href=re.compile('(?=^http.*sina.*\d{4}-\d{2}-\d{2}.*html$)'   # doc pattern
                                                   '(?=^((?!video).)*$)'                         # ignore video
